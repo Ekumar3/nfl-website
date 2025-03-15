@@ -1,10 +1,22 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import axios from "axios"
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [qbName, setQbName] = useState("");
+  const [qbStats, setQbStats] = useState(null);
+
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get(`http://3.137.179.246:5000/search?qb_name=${qbName}`);
+      setQbStats(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setQbStats(null);
+    }
+  };
 
   return (
     <>
@@ -16,20 +28,29 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <h1>NFL QB Stats</h1>
+      <div>
+        <input
+          type="text"
+          value={qbName}
+          onChange={(e) => setQbName(e.target.value)}
+          placeholder="Enter QB Name"
+        />
+        <button onClick={fetchStats}>Get Stats</button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      {qbStats && (
+        <div className="stats">
+        <h2>{qbStats.player}</h2>
+        <p><strong>Games Played:</strong> {qbStats.games_played}</p>
+        <p><strong>Fantasy Points Last Season:</strong> {qbStats.last_season_fp}</p>
+        <p><strong>Fantasy Points Per Game Last Season:</strong> {qbStats.last_season_fppg}</p>
+        <p><strong>Projected Fantasy Points:</strong> {qbStats.predicted_fp}</p>
+        <p><strong>Projected Fantasy Points Per Game:</strong> {qbStats.predicted_fppg}</p>
+        </div>
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
